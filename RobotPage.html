@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>ESP32 Robot Dashboard</title>
+
+    <style>
+        body {
+            margin: 0;
+            background: #f2f2f2;
+            font-family: Arial;
+            display: flex;
+            justify-content: center;
+        }
+
+        .mainContainer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 60px;
+            padding: 40px;
+            max-width: 1100px;
+        }
+
+        /* BULBS */
+
+        .lightContainer {
+            display: flex;
+            gap: 60px;
+        }
+
+        .bulb {
+            width: 150px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .bulb:hover {
+            transform: scale(1.05);
+        }
+
+        /* CONTROLLER */
+
+        .controller {
+            position: relative;
+            width: 320px;
+            height: 320px;
+        }
+
+        .btn {
+            position: absolute;
+            border: none;
+            background: #cfead5;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            background: #f5f0b6;
+            transform: scale(1.05);
+        }
+
+        .btn img {
+            width: 35px;
+        }
+
+        .btn.active {
+            background: #7fffa0 !important;
+            box-shadow: 0 0 12px rgba(0, 200, 0, 0.6);
+        }
+
+        .up {
+            top: 0;
+            left: 110px;
+            width: 90px;
+            height: 60px;
+            border-radius: 100px 100px 0 0;
+        }
+
+        .down {
+            bottom: 0;
+            left: 110px;
+            width: 90px;
+            height: 60px;
+            border-radius: 0 0 100px 100px;
+        }
+
+        .left {
+            top: 110px;
+            left: 0;
+            width: 60px;
+            height: 90px;
+            border-radius: 100px 0 0 100px;
+        }
+
+        .right {
+            top: 110px;
+            right: 0;
+            width: 60px;
+            height: 90px;
+            border-radius: 0 100px 100px 0;
+        }
+
+        .center {
+            position: absolute;
+            top: 100px;
+            left: 100px;
+            width: 120px;
+            height: 120px;
+            background: #e7e7e7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .center img {
+            width: 60px;
+        }
+
+        .driftLeft {
+            top: 115px;
+            left: -55px;
+            background: transparent;
+        }
+
+        .driftRight {
+            top: 115px;
+            right: -55px;
+            background: transparent;
+        }
+
+        .driftLeft img,
+        .driftRight img {
+            width: 40px;
+        }
+
+        /* SENSOR TABLE */
+
+        .sensorPanel {
+            width: 100%;
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .sensorTable {
+            margin: auto;
+            border-collapse: collapse;
+            width: 550px;
+            background: white;
+        }
+
+        .sensorTable th,
+        .sensorTable td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            font-size: 18px;
+        }
+
+        .sensorTable th {
+            background: #cfead5;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="mainContainer">
+
+        <!-- BULB CONTROL -->
+
+        <div class="lightContainer">
+
+            <img src="bulb_off.png" id="bulb1" class="bulb" onclick="toggleLight1()">
+            <img src="bulb_off.png" id="bulb2" class="bulb" onclick="toggleLight2()">
+
+        </div>
+
+        <!-- ROBOT CONTROLLER -->
+
+        <div class="controller">
+
+            <button class="btn up" onclick="directionClick(this,'forward')">
+                <img src="up.png">
+            </button>
+
+            <button class="btn left" onclick="directionClick(this,'left')">
+                <img src="left.png">
+            </button>
+
+            <div class="center" onclick="stopRobot()">
+                <img src="speaker.png">
+            </div>
+
+            <button class="btn right" onclick="directionClick(this,'right')">
+                <img src="right.png">
+            </button>
+
+            <button class="btn down" onclick="directionClick(this,'backward')">
+                <img src="down.png">
+            </button>
+
+            <button class="btn driftLeft" onclick="directionClick(this,'driftLeft')">
+                <img src="drift_left.png">
+            </button>
+
+            <button class="btn driftRight" onclick="directionClick(this,'driftRight')">
+                <img src="drift_right.png">
+            </button>
+
+        </div>
+
+        <!-- SENSOR TABLE -->
+
+        <div class="sensorPanel">
+
+            <h2>Sensor Monitoring</h2>
+
+            <table class="sensorTable">
+
+                <tr>
+                    <th>Sensor</th>
+                    <th>Status</th>
+                    <th>Value</th>
+                </tr>
+
+                <tr>
+                    <td>Temperature</td>
+                    <td><img id="tempImg" src="green.png" width="35"></td>
+                    <td id="tempValue">--</td>
+                </tr>
+
+                <tr>
+                    <td>Light</td>
+                    <td><img id="lightImg" src="green.png" width="35"></td>
+                    <td id="lightValue">--</td>
+                </tr>
+
+                <tr>
+                    <td>Gas</td>
+                    <td><img id="gasImg" src="green.png" width="35"></td>
+                    <td id="gasValue">--</td>
+                </tr>
+
+                <tr>
+                    <td>Distance</td>
+                    <td><img id="distImg" src="green.png" width="35"></td>
+                    <td id="distValue">--</td>
+                </tr>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        /* FIREBASE BASE URL */
+
+        const baseUrl = "https://mydbatngi-default-rtdb.firebaseio.com";
+
+        /* WRITE VALUE */
+
+        function writeValue(path, value) {
+
+            fetch(`${baseUrl}/${path}.json`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(value)
+            })
+                .catch(err => console.log(err));
+
+        }
+
+        /* DIRECTION BUTTON */
+
+        let activeBtn = null;
+
+        function directionClick(button, direction) {
+
+            if (activeBtn) activeBtn.classList.remove("active");
+
+            button.classList.add("active");
+            activeBtn = button;
+
+            writeValue("Details/Direction", direction);
+
+        }
+
+        /* STOP BUTTON */
+
+        function stopRobot() {
+
+            if (activeBtn) {
+                activeBtn.classList.remove("active");
+                activeBtn = null;
+            }
+
+            writeValue("Details/Direction", "stop");
+
+        }
+
+        /* BULB CONTROL */
+
+        let light1 = false;
+        let light2 = false;
+
+        function toggleLight1() {
+
+            light1 = !light1;
+
+            document.getElementById("bulb1").src =
+                light1 ? "bulb_on.png" : "bulb_off.png";
+
+            writeValue("Details/B1S", light1 ? "On" : "Off");
+
+        }
+
+        function toggleLight2() {
+
+            light2 = !light2;
+
+            document.getElementById("bulb2").src =
+                light2 ? "bulb_on.png" : "bulb_off.png";
+
+            writeValue("Details/B2S", light2 ? "On" : "Off");
+
+        }
+
+        /* LOAD INITIAL DATA */
+
+        function loadInitialState() {
+
+            fetch(`${baseUrl}/Details.json`)
+                .then(res => res.json())
+                .then(data => {
+
+                    if (!data) return;
+
+                    /* BULB STATUS */
+
+                    if (data.B1S === "On") {
+                        light1 = true;
+                        document.getElementById("bulb1").src = "bulb_on.png";
+                    }
+
+                    if (data.B2S === "On") {
+                        light2 = true;
+                        document.getElementById("bulb2").src = "bulb_on.png";
+                    }
+
+                    /* DIRECTION BUTTON */
+
+                    const map = {
+                        forward: ".up",
+                        backward: ".down",
+                        left: ".left",
+                        right: ".right",
+                        driftLeft: ".driftLeft",
+                        driftRight: ".driftRight"
+                    };
+
+                    if (map[data.Direction]) {
+                        activeBtn = document.querySelector(map[data.Direction]);
+                        activeBtn.classList.add("active");
+                    }
+
+                    updateSensors(data);
+
+                });
+
+        }
+
+        /* UPDATE SENSOR UI */
+
+        function updateSensors(data) {
+
+            document.getElementById("tempValue").innerText = data.Temp || "--";
+            document.getElementById("lightValue").innerText = data.Light || "--";
+            document.getElementById("gasValue").innerText = data.Gas || "--";
+            document.getElementById("distValue").innerText = data.Distance || "--";
+
+            /* TEMP */
+
+            document.getElementById("tempImg").src =
+                data.Temp > 30 ? "red.png" : "green.png";
+
+            /* GAS */
+
+            document.getElementById("gasImg").src =
+                data.Gas > 300 ? "red.png" : "green.png";
+
+            /* LIGHT */
+
+            document.getElementById("lightImg").src =
+                data.Light < 200 ? "red.png" : "green.png";
+
+            /* DISTANCE */
+
+            document.getElementById("distImg").src =
+                data.Distance < 20 ? "red.png" : "green.png";
+
+        }
+
+        /* AUTO UPDATE */
+
+        function listenSensors() {
+
+            setInterval(() => {
+
+                fetch(`${baseUrl}/Details.json`)
+                    .then(res => res.json())
+                    .then(data => {
+
+                        if (data) updateSensors(data);
+
+                    });
+
+            }, 1000);
+
+        }
+
+        /* START */
+
+        loadInitialState();
+        listenSensors();
+
+    </script>
+
+</body>
+
+</html>

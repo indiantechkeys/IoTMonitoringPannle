@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Robot Controller</title>
+
+    <style>
+        body {
+            margin: 0;
+            background: #f2f2f2;
+            font-family: Arial;
+        }
+
+        .mainContainer {
+            display: flex;
+            justify-content: space-between;
+            padding: 60px;
+        }
+
+        /* BULB SECTION */
+
+        .lightContainer {
+            display: flex;
+            gap: 100px;
+        }
+
+        .bulb {
+            width: 220px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .bulb:hover {
+            transform: scale(1.05);
+        }
+
+        /* CONTROLLER */
+
+        .controller {
+            position: relative;
+            width: 420px;
+            height: 420px;
+        }
+
+        .btn {
+            position: absolute;
+            border: none;
+            background: #cfead5;
+            cursor: pointer;
+            transition: 0.25s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            background: #f5f0b6;
+            transform: scale(1.08);
+        }
+
+        .btn img {
+            width: 55px;
+        }
+
+        .up {
+            top: 0;
+            left: 150px;
+            width: 120px;
+            height: 90px;
+            border-radius: 120px 120px 0 0;
+        }
+
+        .down {
+            bottom: 0;
+            left: 150px;
+            width: 120px;
+            height: 90px;
+            border-radius: 0 0 120px 120px;
+        }
+
+        .left {
+            top: 150px;
+            left: 0;
+            width: 90px;
+            height: 120px;
+            border-radius: 120px 0 0 120px;
+        }
+
+        .right {
+            top: 150px;
+            right: 0;
+            width: 90px;
+            height: 120px;
+            border-radius: 0 120px 120px 0;
+        }
+
+        .center {
+            position: absolute;
+            top: 150px;
+            left: 150px;
+            width: 120px;
+            height: 120px;
+            background: #e7e7e7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .center img {
+            width: 70px;
+        }
+
+        .driftLeft {
+            top: 170px;
+            left: -90px;
+            background: transparent;
+        }
+
+        .driftRight {
+            top: 170px;
+            right: -90px;
+            background: transparent;
+        }
+
+        .driftLeft img,
+        .driftRight img {
+            width: 60px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="mainContainer">
+
+        <!-- BULBS -->
+
+        <div class="lightContainer">
+
+            <img src="bulb_off.png" id="bulb1" class="bulb" onclick="toggleLight1()">
+
+            <img src="bulb_off.png" id="bulb2" class="bulb" onclick="toggleLight2()">
+
+        </div>
+
+        <!-- ROBOT CONTROLLER -->
+
+        <div class="controller">
+
+            <button class="btn up" onclick="forward()">
+                <img src="up.png">
+            </button>
+
+            <button class="btn left" onclick="left()">
+                <img src="left.png">
+            </button>
+
+            <div class="center">
+                <img src="speaker.png">
+            </div>
+
+            <button class="btn right" onclick="right()">
+                <img src="right.png">
+            </button>
+
+            <button class="btn down" onclick="backward()">
+                <img src="down.png">
+            </button>
+
+            <button class="btn driftLeft" onclick="driftLeft()">
+                <img src="drift_left.png">
+            </button>
+
+            <button class="btn driftRight" onclick="driftRight()">
+                <img src="drift_right.png">
+            </button>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        /* FIREBASE URL */
+
+        const url = "https://sjitfirebase-default-rtdb.firebaseio.com/Details.json";
+
+        function sendData(data) {
+
+            fetch(url, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
+
+        }
+
+        /* ROBOT MOVEMENT */
+
+        function forward() { sendData({ Direction: "forward" }); }
+        function backward() { sendData({ Direction: "backward" }); }
+        function left() { sendData({ Direction: "left" }); }
+        function right() { sendData({ Direction: "right" }); }
+        function driftLeft() { sendData({ Direction: "driftLeft" }); }
+        function driftRight() { sendData({ Direction: "driftRight" }); }
+
+        /* BULB CONTROL */
+
+        let light1 = false;
+        let light2 = false;
+
+        function toggleLight1() {
+
+            light1 = !light1;
+
+            document.getElementById("bulb1").src =
+                light1 ? "bulb_on.png" : "bulb_off.png";
+
+            sendData({ B1S: light1 ? "On" : "Off" });
+
+        }
+
+        function toggleLight2() {
+
+            light2 = !light2;
+
+            document.getElementById("bulb2").src =
+                light2 ? "bulb_on.png" : "bulb_off.png";
+
+            sendData({ B2S: light2 ? "On" : "Off" });
+
+        }
+
+    </script>
+
+</body>
+
+</html>
